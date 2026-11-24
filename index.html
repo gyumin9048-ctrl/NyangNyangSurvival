@@ -20,6 +20,11 @@
       </div>
       <div id="unity-warning"> </div>
       <div id="unity-fullscreen-button" title="전체 화면"></div>
+      <div id="unity-perf-notice">
+        브라우저의 그래픽 가속이 꺼져 있어 게임이 느릴 수 있어요.<br>
+        크롬: 설정 → 시스템 → <b>"가능한 경우 그래픽 가속 사용"</b>을 켜고 크롬을 다시 시작해 주세요.
+        <span id="unity-perf-notice-close" title="닫기">✕</span>
+      </div>
     </div>
     <script>
       var canvas = document.querySelector("#unity-canvas");
@@ -31,6 +36,25 @@
       // 렉이 심해졌다. 보이는 크기는 창에 맞추되, 내부 렌더링 해상도는 가로 MAX_RENDER_WIDTH로 제한하고
       // 브라우저가 늘려서 보여준다(화면 배율 devicePixelRatio도 무시).
       var MAX_RENDER_WIDTH = 1280;
+
+      // [웹 최적화, 2026-11-24] 크롬 하드웨어 가속이 꺼져 있거나 GPU가 차단되면 WebGL을 CPU로 그린다
+      // (소프트웨어 렌더링 - 엣지는 정상인데 크롬만 렉이 심했던 원인). 이때는 해상도를 더 낮추고 안내를 띄운다.
+      function detectSoftwareRendering() {
+        try {
+          var test = document.createElement("canvas");
+          var strict = test.getContext("webgl2", { failIfMajorPerformanceCaveat: true });
+          if (!strict) return true;
+          var ext = strict.getExtension("WEBGL_debug_renderer_info");
+          var name = ext ? String(strict.getParameter(ext.UNMASKED_RENDERER_WEBGL)).toLowerCase() : "";
+          var lose = strict.getExtension("WEBGL_lose_context");
+          if (lose) lose.loseContext();
+          return /swiftshader|llvmpipe|software|basic render/.test(name);
+        } catch (e) {
+          return false;
+        }
+      }
+      var softwareRendering = detectSoftwareRendering();
+      if (softwareRendering) MAX_RENDER_WIDTH = 800;
       function fitCanvas() {
         var w = window.innerWidth, h = window.innerHeight;
         var aspect = Math.min(Math.max(w / h, MIN_ASPECT), MAX_ASPECT);
@@ -64,12 +88,12 @@
       }
 
       var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/NyangNyangSurvival_Web_ver.0.1.5.loader.js";
+      var loaderUrl = buildUrl + "/42b5ed9b6ac7b0fdab543435dfee5132.loader.js";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/NyangNyangSurvival_Web_ver.0.1.5.data.unityweb",
-        frameworkUrl: buildUrl + "/NyangNyangSurvival_Web_ver.0.1.5.framework.js.unityweb",
-        codeUrl: buildUrl + "/NyangNyangSurvival_Web_ver.0.1.5.wasm.unityweb",
+        dataUrl: buildUrl + "/7dd667f39f821936337219ead9851f1c.data.unityweb",
+        frameworkUrl: buildUrl + "/920f339d620ce6295ad188e9563930c0.framework.js.unityweb",
+        codeUrl: buildUrl + "/1159905f0dcb6c43da524ca480e0c610.wasm.unityweb",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "NyangNyangCompany",
         productName: "NyangNyangSurvival_Ver.0.1.5",
@@ -78,6 +102,12 @@
       };
       // 렌더링 해상도는 위 fitCanvas()가 canvas.width/height로 직접 정한다.
       config.matchWebGLToCanvasSize = false;
+
+      if (softwareRendering) {
+        var notice = document.querySelector("#unity-perf-notice");
+        notice.style.display = "block";
+        document.querySelector("#unity-perf-notice-close").onclick = function () { notice.style.display = "none"; };
+      }
 
       document.querySelector("#unity-loading-bar").style.display = "block";
 

@@ -9,4 +9,7 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 #unity-progress-bar-full { width: 0%; height: 18px; margin-top: 10px; background: url('progress-bar-full-dark.png') no-repeat center }
 #unity-fullscreen-button { position: absolute; right: 8px; bottom: 8px; width: 38px; height: 38px; cursor: pointer; background: url('fullscreen-button.png') no-repeat center rgba(255,255,255,0.6); border-radius: 6px; opacity: 0.35; transition: opacity 0.2s; display: none }
 #unity-fullscreen-button:hover { opacity: 1 }
+#unity-perf-notice { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); max-width: 90%; padding: 10px 36px 10px 14px; background: rgba(20,20,20,0.88); color: #fff; font: 14px/1.5 sans-serif; border-radius: 8px; display: none; z-index: 10 }
+#unity-perf-notice-close { position: absolute; right: 10px; top: 8px; cursor: pointer; opacity: 0.7 }
+#unity-perf-notice-close:hover { opacity: 1 }
 #unity-warning { position: absolute; left: 50%; top: 5%; transform: translate(-50%); background: white; padding: 10px; display: none }
